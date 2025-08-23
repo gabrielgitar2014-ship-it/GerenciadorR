@@ -293,6 +293,7 @@ export default function DespesasTab({ selectedMonth, setSelectedMonth }) {
                     ) : currentData.length > 0 ? (
                         currentData.map(parcela => {
                             const isSelected = selectedItems.has(parcela.despesas?.id);
+                            // A variável 'displayDate' não é mais necessária aqui, mas não prejudica mantê-la.
                             const displayDate = parcela.despesas?.data_compra || parcela.data_parcela;
                             return (
                                 <div key={parcela.id} onClick={() => !selectionMode && handleOpenDetailModal(parcela)} className={`flex items-center bg-gray-50 p-4 rounded-lg shadow-sm transition-all duration-200 ${selectionMode ? 'cursor-pointer' : 'hover:shadow-md'} ${isSelected ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}>
@@ -301,14 +302,22 @@ export default function DespesasTab({ selectedMonth, setSelectedMonth }) {
                                             <input type="checkbox" checked={isSelected} onChange={() => parcela.despesas && handleSelectItem(parcela.despesas.id)} className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
                                         </div>
                                     )}
-                                    {/* CORREÇÃO 1: Adicionada a classe 'min-w-0' para permitir que o container encolha */}
                                     <div className="flex-1 text-left w-full min-w-0">
+                                        {/* =================================================================== */}
+                                        {/* INÍCIO DA ALTERAÇÃO                       */}
+                                        {/* =================================================================== */}
                                         <div className="flex justify-between items-start">
-                                            {/* CORREÇÃO 2: Adicionada a classe 'truncate' para cortar o texto com '...' */}
                                             <p className="font-bold text-gray-800 truncate">{parcela.despesas?.description || 'Descrição indisponível'}</p>
-                                            {displayDate && (<p className="text-sm text-gray-600 whitespace-nowrap ml-2">{formatarData(displayDate)}</p>)}
+                                            {/* LINHA DA DATA REMOVIDA DAQUI */}
                                         </div>
-                                        <p className="text-sm text-gray-500 mt-1">{parcela.despesas?.metodo_pagamento}{parcela.despesas?.qtd_parcelas > 1 && (<span className="ml-2 bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs font-semibold">{parcela.numero_parcela} / {parcela.despesas.qtd_parcelas}</span>)}</p>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {/* Agora mostra apenas o método de pagamento (banco) */}
+                                            {parcela.despesas?.metodo_pagamento}
+                                            {/* CONTADOR DE PARCELA REMOVIDO DAQUI */}
+                                        </p>
+                                        {/* =================================================================== */}
+                                        {/* FIM DA ALTERAÇÃO                          */}
+                                        {/* =================================================================== */}
                                     </div>
                                     <div className="flex items-center w-auto ml-4">
                                         <p className="text-lg font-semibold text-red-600 mr-4">{formatCurrency(parcela.amount)}</p>
