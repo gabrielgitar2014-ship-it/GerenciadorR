@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useData } from "../context/DataContext";
+import { useData } from "../../context/DataContext";
 
 import Header from "../components/Header";
 import GeneralTab from "../components/tabs/Generaltab.jsx";
@@ -134,3 +134,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
