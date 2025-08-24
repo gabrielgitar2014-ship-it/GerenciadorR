@@ -99,7 +99,17 @@ export default function DespesasTab({ selectedMonth, setSelectedMonth }) {
             const [ano, mes] = mesInicioCobranca.split('-').map(Number);
             let dataBaseParaCalculo = new Date(Date.UTC(ano, mes - 1, 1));
             
-            dataBaseParaCalculo.setUTCMonth(dataBaseParaCalculo.getUTCMonth() + qtd_parcelas);
+            // ===================================================================
+            //                      LÓGICA DE CÁLCULO CORRIGIDA
+            // ===================================================================
+
+            // LINHA ANTERIOR (que adiantava um mês)
+            // dataBaseParaCalculo.setUTCMonth(dataBaseParaCalculo.getUTCMonth() + qtd_parcelas);
+
+            // NOVA LINHA (lógica correta com -1)
+            dataBaseParaCalculo.setUTCMonth(dataBaseParaCalculo.getUTCMonth() + qtd_parcelas - 1);
+
+            // ===================================================================
             
             endDate = dataBaseParaCalculo.toLocaleDateString("pt-BR", { 
                 month: "long", 
@@ -293,8 +303,6 @@ export default function DespesasTab({ selectedMonth, setSelectedMonth }) {
                     ) : currentData.length > 0 ? (
                         currentData.map(parcela => {
                             const isSelected = selectedItems.has(parcela.despesas?.id);
-                            // A variável 'displayDate' não é mais necessária aqui, mas não prejudica mantê-la.
-                            const displayDate = parcela.despesas?.data_compra || parcela.data_parcela;
                             return (
                                 <div key={parcela.id} onClick={() => !selectionMode && handleOpenDetailModal(parcela)} className={`flex items-center bg-gray-50 p-4 rounded-lg shadow-sm transition-all duration-200 ${selectionMode ? 'cursor-pointer' : 'hover:shadow-md'} ${isSelected ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}>
                                     {selectionMode && (
@@ -303,21 +311,10 @@ export default function DespesasTab({ selectedMonth, setSelectedMonth }) {
                                         </div>
                                     )}
                                     <div className="flex-1 text-left w-full min-w-0">
-                                        {/* =================================================================== */}
-                                        {/* INÍCIO DA ALTERAÇÃO                       */}
-                                        {/* =================================================================== */}
-                                        <div className="flex justify-between items-start">
-                                            <p className="font-bold text-gray-800 truncate">{parcela.despesas?.description || 'Descrição indisponível'}</p>
-                                            {/* LINHA DA DATA REMOVIDA DAQUI */}
-                                        </div>
+                                        <p className="font-bold text-gray-800 truncate">{parcela.despesas?.description || 'Descrição indisponível'}</p>
                                         <p className="text-sm text-gray-500 mt-1">
-                                            {/* Agora mostra apenas o método de pagamento (banco) */}
                                             {parcela.despesas?.metodo_pagamento}
-                                            {/* CONTADOR DE PARCELA REMOVIDO DAQUI */}
                                         </p>
-                                        {/* =================================================================== */}
-                                        {/* FIM DA ALTERAÇÃO                          */}
-                                        {/* =================================================================== */}
                                     </div>
                                     <div className="flex items-center w-auto ml-4">
                                         <p className="text-lg font-semibold text-red-600 mr-4">{formatCurrency(parcela.amount)}</p>
