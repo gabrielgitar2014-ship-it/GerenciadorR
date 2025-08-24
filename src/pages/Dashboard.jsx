@@ -79,9 +79,7 @@ export default function Dashboard() {
       className="min-h-screen bg-cover bg-center bg-fixed"
     >
       <div className="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm"></div>
-      
-      {/* Container principal agora é um flex-col que ocupa a altura da tela */}
-      <div className="relative z-10 flex flex-col h-screen">
+      <div className="relative z-10">
         <Header
           selectedMonth={selectedMonth}
           setSelectedMonth={setSelectedMonth}
@@ -95,18 +93,22 @@ export default function Dashboard() {
         
         {isRelatorioModalOpen && <RelatorioModal onClose={() => setIsRelatorioModalOpen(false)} />}
 
-        {/* A área principal agora cresce e tem sua própria rolagem */}
-        <main className="container mx-auto p-2 md:p-4 flex-1 overflow-y-auto pb-28">
+        <main className="container mx-auto p-2 md:p-4 pb-28">
           {error && <ErrorNotification message={error} onClose={() => setError(null)} />}
 
-          {/* O container da aba ativa agora precisa ocupar toda a altura disponível */}
-          <div className="mt-4 h-full">
+          <div className="mt-4">
             {tabComponents[activeTab]}
           </div>
         </main>
         
-        <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20">
-          <div className="container mx-auto grid grid-cols-5">
+        {/* =================================================================== */}
+        {/* INÍCIO DA MODIFICAÇÃO                        */}
+        {/* =================================================================== */}
+
+        {/* O footer agora apenas posiciona a barra 4 unidades (1rem) acima do fundo */}
+        <footer className="fixed bottom-4 left-4 right-4 z-20">
+          {/* O div interno agora tem o estilo: fundo branco, sombra e bordas arredondadas */}
+          <div className="container mx-auto grid grid-cols-5 bg-white shadow-xl rounded-full">
             {MAIN_TABS.map(tab => {
               const isActive = activeTab === tab;
               return (
@@ -115,7 +117,7 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(tab)}
                   className={`flex flex-col items-center justify-center text-center p-2 transition-colors duration-200 ${
                     isActive ? 'text-purple-700' : 'text-gray-500 hover:text-purple-600'
-                  }`}
+                  } first:rounded-l-full last:rounded-r-full`} // Adicionado para arredondar as pontas
                 >
                   <span className="material-symbols-outlined">{mainTabIcons[tab]}</span>
                   <span className="text-xs font-semibold">{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
@@ -124,6 +126,10 @@ export default function Dashboard() {
             })}
           </div>
         </footer>
+        
+        {/* =================================================================== */}
+        {/* FIM DA MODIFICAÇÃO                         */}
+        {/* =================================================================== */}
       </div>
     </div>
   );
