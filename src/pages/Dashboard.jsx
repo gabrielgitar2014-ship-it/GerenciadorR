@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useData } from "../../context/DataContext";
+import { useData } from "../context/DataContext";
 import { supabase } from "../../supabaseClient";
 import NovaDespesaModal from "../modals/NovaDespesaModal.jsx";
 import DespesasDetalhesModal from "../modals/DespesasDetalhesModal.jsx";
@@ -336,3 +336,4 @@ export default function DespesasTab({ selectedMonth, setSelectedMonth }) {
         </div>
     );
 }
+
