@@ -36,7 +36,7 @@ const mainTabIcons = {
 const MAIN_TABS = ['geral', 'despesas', 'renda', 'fixas', 'bancos'];
 
 export default function Dashboard() {
-  const { allParcelas, loading, error, fetchData, setError } = useData(); // Adicionado setError para limpar erros se necessário
+  const { allParcelas, loading, error, fetchData, setError } = useData();
   
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'geral');
@@ -51,24 +51,15 @@ export default function Dashboard() {
     return allParcelas.filter(p => p.data_parcela && p.data_parcela.startsWith(selectedMonth));
   }, [selectedMonth, allParcelas]);
 
-  // ===================================================================
-  //                      INÍCIO DA MODIFICAÇÃO
-  // ===================================================================
-  // 1. Criamos a nova função 'handleSync'
-  //    Ela é 'async' e usa um bloco try...catch para detectar sucesso ou falha.
   const handleSync = async () => {
     try {
-      await fetchData(); // Chama a função original de busca de dados
-      return { success: true }; // Se fetchData funcionar, retorna sucesso
+      await fetchData();
+      return { success: true };
     } catch (err) {
       console.error("Falha na sincronização a partir do Dashboard:", err);
-      // Se fetchData falhar (lançar um erro), o catch captura.
-      return { success: false, error: err.message }; // Retorna falha e a mensagem de erro
+      return { success: false, error: err.message };
     }
   };
-  // ===================================================================
-  //                        FIM DA MODIFICAÇÃO
-  // ===================================================================
 
   const handleClearAllData = async () => { /* ... sua lógica de limpar dados ... */ };
 
@@ -88,11 +79,12 @@ export default function Dashboard() {
       className="min-h-screen bg-cover bg-center bg-fixed"
     >
       <div className="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm"></div>
-      <div className="relative z-10">
+      
+      {/* Container principal agora é um flex-col que ocupa a altura da tela */}
+      <div className="relative z-10 flex flex-col h-screen">
         <Header
           selectedMonth={selectedMonth}
           setSelectedMonth={setSelectedMonth}
-          // 2. Passamos a nova função 'handleSync' para a prop onSync
           onSync={handleSync}
           onClearData={handleClearAllData}
           loading={loading}
@@ -103,10 +95,12 @@ export default function Dashboard() {
         
         {isRelatorioModalOpen && <RelatorioModal onClose={() => setIsRelatorioModalOpen(false)} />}
 
-        <main className="container mx-auto p-2 md:p-4 pb-28">
+        {/* A área principal agora cresce e tem sua própria rolagem */}
+        <main className="container mx-auto p-2 md:p-4 flex-1 overflow-y-auto pb-28">
           {error && <ErrorNotification message={error} onClose={() => setError(null)} />}
 
-          <div className="mt-4">
+          {/* O container da aba ativa agora precisa ocupar toda a altura disponível */}
+          <div className="mt-4 h-full">
             {tabComponents[activeTab]}
           </div>
         </main>
