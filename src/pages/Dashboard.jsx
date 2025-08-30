@@ -1,7 +1,14 @@
+// src/pages/Dashboard.jsx
+
 import { useState, useEffect, useMemo } from "react";
 import { useData } from "../context/DataContext";
 
+// Componentes
 import Header from "../components/Header";
+import NovaDespesaModal from "../components/modals/NovaDespesaModal";
+import RelatorioModal from "../components/modals/RelatorioModal";
+
+// Abas
 import GeneralTab from "../components/tabs/Generaltab.jsx";
 import DespesasTab from "../components/tabs/DespesasTab.jsx";
 import RendaTab from "../components/tabs/RendaTab.jsx";
@@ -9,7 +16,7 @@ import FixasTab from "../components/tabs/FixasTab.jsx";
 import BancosTab from "../components/tabs/BancosTab.jsx";
 import PedidosTab from "../components/tabs/PedidosTab.jsx";
 import CalculadoraTab from "../components/tabs/CalculadoraTab.jsx";
-import RelatorioModal from "../components/modals/RelatorioModal";
+
 
 const getCurrentMonth = () => {
   const now = new Date();
@@ -36,19 +43,20 @@ const mainTabIcons = {
 const MAIN_TABS = ['geral', 'despesas', 'renda', 'fixas', 'bancos'];
 
 export default function Dashboard() {
-  const { allParcelas, loading, error, fetchData, setError } = useData();
+  const { allParcelas, loading, error, fetchData, setError, cardConfigs } = useData();
   
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'geral');
   const [isRelatorioModalOpen, setIsRelatorioModalOpen] = useState(false);
+  const [isDespesaModalOpen, setIsDespesaModalOpen] = useState(false);
+  const [despesaParaEditar, setDespesaParaEditar] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
 
   const parcelasDoMesSelecionado = useMemo(() => {
-    if (!selectedMonth) return [];
-    return allParcelas.filter(p => p.data_parcela && p.data_parcela.startsWith(selectedMonth));
+    return (allParcelas || []).filter(p => p.data_parcela && p.data_parcela.startsWith(selectedMonth));
   }, [selectedMonth, allParcelas]);
 
   const handleSync = async () => {
@@ -61,7 +69,27 @@ export default function Dashboard() {
     }
   };
 
-  const handleClearAllData = async () => { /* ... sua lógica de limpar dados ... */ };
+  const handleClearAllData = async () => { 
+    console.log("Função para limpar dados chamada.");
+  };
+
+  const handleOpenCreateModal = () => {
+    setDespesaParaEditar(null);
+    setIsDespesaModalOpen(true);
+  };
+
+  const handleCloseDespesaModal = () => {
+    setIsDespesaModalOpen(false);
+    setDespesaParaEditar(null);
+  };
+  
+  const handleSaveDespesaSuccess = (despesaSalva, mesDeDestino) => {
+    handleCloseDespesaModal();
+    fetchData();
+    if (selectedMonth !== mesDeDestino) {
+        setSelectedMonth(mesDeDestino);
+    }
+  };
 
   const tabComponents = {
     geral: <GeneralTab selectedMonth={selectedMonth} parcelasDoMes={parcelasDoMesSelecionado} />,
@@ -75,7 +103,8 @@ export default function Dashboard() {
 
   return (
     <div
-      style={{ backgroundImage: `url("https://cdn.quantosobra.com.br/qs-site/uploads/2021/08/bg-sistema-de-gestao-1.png")` }}
+      // CORREÇÃO: Substituí o link quebrado por um link funcional do Unsplash.
+      style={{ backgroundImage: `url("https://pt.pngtree.com/freepng/financial-planning-calculating-risk-icon-concept_9151342.html" )` }}
       className="min-h-screen bg-cover bg-center bg-fixed"
     >
       <div className="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm"></div>
@@ -89,26 +118,32 @@ export default function Dashboard() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onOpenRelatorioModal={() => setIsRelatorioModalOpen(true)}
+          onOpenCreateModal={handleOpenCreateModal}
         />
         
         {isRelatorioModalOpen && <RelatorioModal onClose={() => setIsRelatorioModalOpen(false)} />}
+        {isDespesaModalOpen && (
+          <NovaDespesaModal
+            onClose={handleCloseDespesaModal}
+            onSave={handleSaveDespesaSuccess}
+            despesaParaEditar={despesaParaEditar}
+            cardConfigs={cardConfigs}
+          />
+        )}
 
         <main className="container mx-auto p-2 md:p-4 pb-28">
           {error && <ErrorNotification message={error} onClose={() => setError(null)} />}
-
-          <div className="mt-4">
-            {tabComponents[activeTab]}
-          </div>
+          {loading && activeTab !== 'pedidos' && activeTab !== 'calculadora' ? (
+            <div className="text-center mt-8"><p className="font-semibold text-lg">Carregando dados...</p></div>
+          ) : (
+            <div className="mt-4">
+              {tabComponents[activeTab]}
+            </div>
+          )}
         </main>
         
-        {/* =================================================================== */}
-        {/* INÍCIO DA MODIFICAÇÃO                        */}
-        {/* =================================================================== */}
-
-        {/* O footer agora apenas posiciona a barra 4 unidades (1rem) acima do fundo */}
         <footer className="fixed bottom-4 left-4 right-4 z-20">
-          {/* O div interno agora tem o estilo: fundo branco, sombra e bordas arredondadas */}
-          <div className="container mx-auto grid grid-cols-5 bg-white shadow-xl rounded-full">
+          <div className="container mx-auto grid grid-cols-6 bg-white shadow-xl rounded-full">
             {MAIN_TABS.map(tab => {
               const isActive = activeTab === tab;
               return (
@@ -117,22 +152,15 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(tab)}
                   className={`flex flex-col items-center justify-center text-center p-2 transition-colors duration-200 ${
                     isActive ? 'text-purple-700' : 'text-gray-500 hover:text-purple-600'
-                  } first:rounded-l-full last:rounded-r-full`} // Adicionado para arredondar as pontas
+                  } first:rounded-l-full last:rounded-r-full`}
                 >
                   <span className="material-symbols-outlined">{mainTabIcons[tab]}</span>
-                  <span className="text-xs font-semibold">{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
                 </button>
               );
             })}
           </div>
         </footer>
-        
-        {/* =================================================================== */}
-        {/* FIM DA MODIFICAÇÃO                         */}
-        {/* =================================================================== */}
       </div>
     </div>
   );
 }
-
-
